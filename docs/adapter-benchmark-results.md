@@ -57,7 +57,7 @@ This report evaluates only two modes: `no-memory` and `mcp+hooks`. The adapter r
 - Claude Code proof page / Claude Code 证明页: `docs/benchmark-artifacts/proofs/claude-code-proof.html`
 - Claude Code screenshot / Claude Code 截图: `docs/benchmark-artifacts/screenshots/claude-code-proof.png`
 - Sanitized JSON result files / 脱敏 JSON 结果: `docs/benchmark-artifacts/results/`
-- Raw local JSON/JSONL outputs / 本地原始输出: `benchmarks/adapter-memory/results/`，仅用于本地审计且已被 git 忽略 / for local audit only and ignored by git.
+- Raw local JSON/JSONL/TXT outputs / 本地原始输出: `benchmarks/adapter-memory/results/`，已纳入该 proof 仓库用于完整证据审计 / committed in this proof repository for complete evidence audit.
 - Gateway/MCP/hook log excerpts with secrets removed / Gateway、MCP、hook 日志摘录需要移除密钥。
 
 ## 截图证据 / Screenshot Evidence
@@ -72,4 +72,3 @@ This report evaluates only two modes: `no-memory` and `mcp+hooks`. The adapter r
 - Codex 和 Claude Code 行证明真实平台入口可以走同一条适配路线。 / The Codex and Claude Code rows prove the same route through real platform entrypoints.
 - 截图来自 raw platform JSONL 生成的 proof page；即使桌面自动化无法直接控制 Codex 或终端窗口，证据仍然可审阅。 / Screenshots are proof-page captures generated from raw platform JSONL streams, keeping evidence reviewable even when desktop automation cannot control Codex or terminal windows.
 - 如果某个平台行缺失，应先查看对应 CLI discovery/error 输出，再判断是否是 adapter 故障。 / If a platform row is missing, inspect CLI discovery/error output before treating it as an adapter failure.
-

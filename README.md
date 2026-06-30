@@ -7,7 +7,7 @@ Upstream source repository:
 - Repository: `TencentCloud/TencentDB-Agent-Memory`
 - Issue: `https://github.com/TencentCloud/TencentDB-Agent-Memory/issues/235`
 - Source commit originally used for this evidence bundle: `590a30b8524ef2a7f08942f460f196b1527acfbb`
-- Clean upstream PR commit after moving proof artifacts out: `353655d5ceffb09fb7a1b681afbb447d6daef212`
+- Clean upstream PR commit after moving proof artifacts out: `d40c457d5dac69c1b077d9f0c05c78ffa2909bd9`
 - Base commit: `4339e63650920871eb0e8888083a1779d114e3ae`
 - Generated at: `2026-06-28T05:57:48.438Z`
 
@@ -24,11 +24,14 @@ This repository is the external evidence bundle linked from the PR body.
 - Benchmark plan: `docs/adapter-benchmark-plan.md`
 - Generated result summary: `docs/adapter-benchmark-results.md`
 - Sanitized JSON summaries: `docs/benchmark-artifacts/results/`
+- Raw JSON/JSONL/TXT outputs: `benchmarks/adapter-memory/results/`
 - Reviewable proof pages: `docs/benchmark-artifacts/proofs/`
 - Screenshot evidence: `docs/benchmark-artifacts/screenshots/`
 - UI proof guide: `docs/local-ui-proof-guide.md`
 
-Raw local JSON/JSONL outputs are intentionally not committed. They may include local paths or diagnostic information. The committed artifacts are the sanitized review bundle.
+This proof repository intentionally commits the complete raw output bundle, including platform event streams, hook audit logs, text outputs, hook cache snapshots, sanitized summaries, proof pages, and screenshots. The upstream PR keeps those artifacts out of the source tree so its diff remains focused on implementation and docs.
+
+Before publishing the raw bundle, it was scanned for common secret patterns such as API keys, GitHub tokens, bearer credentials, and password assignments. The raw logs may still contain local benchmark paths and diagnostic metadata.
 
 ## Summary
 
@@ -70,7 +73,7 @@ In the upstream PR body, link to a fixed commit or tag of this repository rather
 Suggested wording:
 
 ```md
-Benchmark and UI proof artifacts are intentionally kept outside this PR to avoid committing generated logs, screenshots, and local-path-sensitive files into the source tree.
+Benchmark and UI proof artifacts, including raw JSON/JSONL/TXT event outputs, are intentionally kept outside this PR to avoid committing generated logs, screenshots, and local-path-sensitive files into the source tree.
 
 Full reproducibility bundle:
 https://github.com/NianJiuZst/tdai-memory-adapter-benchmark-proof/tree/<commit-or-tag>

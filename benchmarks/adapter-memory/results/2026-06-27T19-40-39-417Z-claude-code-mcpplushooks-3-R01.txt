@@ -1,0 +1,1 @@
+bench-detail-port-8420 means "The local Gateway proof port is 8420."

@@ -1,0 +1,1 @@
+bench-pref-amber-714 means "PR summaries should start with risk, then proof, then implementation."

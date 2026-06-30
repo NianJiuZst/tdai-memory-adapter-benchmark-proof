@@ -1,0 +1,4 @@
+{"type":"thread.started","thread_id":"019f0a55-7c0b-7d52-9f9c-41b2b5ee7d1c"}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_0","type":"agent_message","text":"I do not know."}}
+{"type":"turn.completed","usage":{"input_tokens":11761,"cached_input_tokens":9088,"output_tokens":32,"reasoning_output_tokens":21}}

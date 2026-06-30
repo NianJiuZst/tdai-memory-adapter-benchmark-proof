@@ -1,0 +1,1 @@
+The proof phrase says Codex and Claude Code are connected to TencentDB Agent Memory through the local MCP gateway.

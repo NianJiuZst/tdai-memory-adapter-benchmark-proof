@@ -1,0 +1,1 @@
+Bench-conv-gold-091 means "Baseline runs must use isolated configuration without MCP servers or hooks."

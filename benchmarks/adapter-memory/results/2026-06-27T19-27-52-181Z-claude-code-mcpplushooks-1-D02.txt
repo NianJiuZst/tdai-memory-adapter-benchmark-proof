@@ -1,0 +1,1 @@
+Codex and Claude Code use MCP plus hooks because they lack OpenClaw-style in-process plugin APIs.

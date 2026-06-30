@@ -1,0 +1,1 @@
+Keep benchmark artifacts reproducible and avoid private account secrets in reports.

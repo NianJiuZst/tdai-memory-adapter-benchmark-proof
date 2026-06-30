@@ -1,0 +1,1 @@
+"PR summaries should start with risk, then proof, then implementation."

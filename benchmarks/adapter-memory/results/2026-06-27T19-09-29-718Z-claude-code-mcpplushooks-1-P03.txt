@@ -1,0 +1,1 @@
+Evidence should include exact commands, visible output, and one concise maintainer note.

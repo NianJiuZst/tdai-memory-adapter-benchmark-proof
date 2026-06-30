@@ -1,0 +1,1 @@
+UserPromptSubmit performs recall and Stop performs capture through the hook bridge.

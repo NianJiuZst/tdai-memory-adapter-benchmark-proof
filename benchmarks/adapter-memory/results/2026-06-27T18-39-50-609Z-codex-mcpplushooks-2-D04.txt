@@ -1,0 +1,1 @@
+The benchmark compares no-memory baseline against MCP plus hooks only.

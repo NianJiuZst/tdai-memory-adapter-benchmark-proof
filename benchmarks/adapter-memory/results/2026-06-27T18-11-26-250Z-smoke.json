@@ -1,0 +1,60 @@
+{
+  "run_id": "2026-06-27T18-11-26-250Z",
+  "created_at": "2026-06-27T18:11:26.250Z",
+  "gateway_url": "http://127.0.0.1:8420",
+  "health": {
+    "status": "ok",
+    "version": "0.1.0",
+    "uptime": 7,
+    "stores": {
+      "vectorStore": true,
+      "embeddingService": false
+    }
+  },
+  "seeded": [
+    {
+      "fact_id": "P01",
+      "marker": "bench-pref-amber-714",
+      "l0_recorded": 2,
+      "scheduler_notified": true,
+      "latency_ms": 260
+    }
+  ],
+  "mcp": {
+    "ok": true,
+    "tools": [
+      "memory_tencentdb_memory_search",
+      "memory_tencentdb_conversation_search"
+    ],
+    "call": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"results\":\"Found 2 matching message(s):\\n\\n---\\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:09:41.946Z] (score: 0.814)\\n\\nFor adapter benchmark, remember this exact fact: bench-pref-amber-714 means \\\"PR summaries should start with risk, then proof, then implementation.\\\"\\n\\n---\\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:11:25.888Z] (score: 0.814)\\n\\nFor adapter benchmark, remember this exact fact: bench-pref-amber-714 means \\\"PR summaries should start with risk, then proof, then implementation.\\\"\\n\",\"total\":2}"
+        }
+      ]
+    },
+    "latency_ms": 48
+  },
+  "hook_recall": {
+    "code": 0,
+    "has_additional_context": true,
+    "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"Relevant prior conversation memory from memory-tencentdb:\\n\\nFound 3 matching message(s):\\n\\n---\\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:09:41.946Z] (score: 0.814)\\n\\nFor adapter benchmark, remember this exact fact: bench-pref-amber-714 means \\\"PR summaries should start with risk, then proof, then implementation.\\\"\\n\\n---\\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:11:25.888Z] (score: 0.814)\\n\\nFor adapter benchmark, remember this exact fact: bench-pref-amber-714 means \\\"PR summaries should start with risk, then proof, then implementation.\\\"\\n\\n---\\n**[assistant]** Session: adapter-benchmark-smoke [2026-06-27T18:09:41.946Z] (score: 0.000)\\n\\nAdapter benchmark seed recorded for P01: PR summaries should start with risk, then proof, then implementation.\\n\"}}",
+    "stderr": "",
+    "latency_ms": 47
+  },
+  "hook_capture": {
+    "code": 0,
+    "stdout": "",
+    "stderr": "",
+    "latency_ms": 46,
+    "capture_search": {
+      "found": true,
+      "latency_ms": 21,
+      "search": {
+        "results": "Found 5 matching message(s):\n\n---\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:11:26.222Z] (score: 0.805)\n\nRemember hook-proof-smoke-1782583886183\n\n---\n**[assistant]** Session: adapter-benchmark-smoke [2026-06-27T18:11:26.222Z] (score: 0.799)\n\nSynthetic hook capture succeeded for hook-proof-smoke-1782583886183.\n\n---\n**[assistant]** Session: adapter-benchmark-smoke [2026-06-27T18:09:42.092Z] (score: 0.641)\n\nSynthetic hook capture succeeded for hook-proof-smoke-1782583782056.\n\n---\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:09:42.092Z] (score: 0.613)\n\nRemember hook-proof-smoke-1782583782056\n\n---\n**[assistant]** Session: adapter-benchmark-smoke [2026-06-27T18:09:41.946Z] (score: 0.000)\n\nAdapter benchmark seed recorded for P01: PR summaries should start with risk, then proof, then implementation.\n",
+        "total": 5
+      }
+    }
+  }
+}

@@ -1,0 +1,1 @@
+bench-detail-mcp-371 means "The MCP server exposes memory_tencentdb_memory_search and memory_tencentdb_conversation_search."

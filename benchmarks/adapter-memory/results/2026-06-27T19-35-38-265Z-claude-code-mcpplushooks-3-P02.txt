@@ -1,0 +1,1 @@
+I searched all available data sources — conversation history, memory store, and local memory files — but found only your repeated queries asking for the definition, not the original sentence that defined `bench-pref-cobalt-219`. The definition does not appear in any accessible record.

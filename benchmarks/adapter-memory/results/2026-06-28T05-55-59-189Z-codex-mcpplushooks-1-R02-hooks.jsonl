@@ -1,0 +1,4 @@
+{"ts":"2026-06-28T05:56:01.329Z","platform":"codex","hook_event":"UserPromptSubmit","type":"before_prompt","outcome":"recall","session_key_hash":"86bc9f4e16ce","session_id_hash":"86bc9f4e16ce","turn_id_hash":"3d28c5390408","context_chars":7006}
+{"ts":"2026-06-28T05:56:01.343Z","platform":"codex","hook_event":"UserPromptSubmit","type":"before_prompt","outcome":"recall","session_key_hash":"86bc9f4e16ce","session_id_hash":"86bc9f4e16ce","turn_id_hash":"3d28c5390408","context_chars":7006}
+{"ts":"2026-06-28T05:56:12.422Z","platform":"codex","hook_event":"Stop","type":"session_end","outcome":"capture","session_key_hash":"86bc9f4e16ce","session_id_hash":"86bc9f4e16ce","turn_id_hash":"3d28c5390408","messages":2}
+{"ts":"2026-06-28T05:56:12.428Z","platform":"codex","hook_event":"Stop","type":"session_end","outcome":"capture","session_key_hash":"86bc9f4e16ce","session_id_hash":"86bc9f4e16ce","turn_id_hash":"3d28c5390408","messages":2}

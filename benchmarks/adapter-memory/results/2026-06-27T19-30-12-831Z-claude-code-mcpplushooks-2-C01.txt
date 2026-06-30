@@ -1,0 +1,1 @@
+bench-conv-maple-143 means "Adapter proof markers must include agent-memory-local-proof when demonstrating local setup."

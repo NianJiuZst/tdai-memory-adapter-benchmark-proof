@@ -1,0 +1,3 @@
+I couldn't find the exact definition sentence in the conversation results returned — the results only show the user's query text, not the assistant's response containing the definition.
+
+Could you share the raw conversation result from your end that contains the sentence `bench-detail-hook-508 means "..."` so I can answer with the exact quoted meaning?

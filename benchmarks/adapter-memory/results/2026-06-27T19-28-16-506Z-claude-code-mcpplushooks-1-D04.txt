@@ -1,0 +1,1 @@
+bench-decision-south-447 means "The benchmark compares no-memory baseline against MCP plus hooks only."

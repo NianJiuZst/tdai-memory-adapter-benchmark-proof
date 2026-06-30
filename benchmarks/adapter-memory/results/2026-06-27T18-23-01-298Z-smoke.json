@@ -1,0 +1,60 @@
+{
+  "run_id": "2026-06-27T18-23-01-298Z",
+  "created_at": "2026-06-27T18:23:01.299Z",
+  "gateway_url": "http://127.0.0.1:8420",
+  "health": {
+    "status": "ok",
+    "version": "0.1.0",
+    "uptime": 9,
+    "stores": {
+      "vectorStore": true,
+      "embeddingService": false
+    }
+  },
+  "seeded": [
+    {
+      "fact_id": "P01",
+      "marker": "bench-pref-amber-714",
+      "l0_recorded": 2,
+      "scheduler_notified": true,
+      "latency_ms": 122
+    }
+  ],
+  "mcp": {
+    "ok": true,
+    "tools": [
+      "memory_tencentdb_memory_search",
+      "memory_tencentdb_conversation_search"
+    ],
+    "call": {
+      "content": [
+        {
+          "type": "text",
+          "text": "{\"results\":\"Found 3 matching message(s):\\n\\n---\\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:09:41.946Z] (score: 0.880)\\n\\nFor adapter benchmark, remember this exact fact: bench-pref-amber-714 means \\\"PR summaries should start with risk, then proof, then implementation.\\\"\\n\\n---\\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:11:25.888Z] (score: 0.880)\\n\\nFor adapter benchmark, remember this exact fact: bench-pref-amber-714 means \\\"PR summaries should start with risk, then proof, then implementation.\\\"\\n\\n---\\n**[user]** Session: adapter-benchmark-local-1782583900491 [2026-06-27T18:11:40.508Z] (score: 0.880)\\n\\nFor adapter benchmark, remember this exact fact: bench-pref-amber-714 means \\\"PR summaries should start with risk, then proof, then implementation.\\\"\\n\",\"total\":3}"
+        }
+      ]
+    },
+    "latency_ms": 43
+  },
+  "hook_recall": {
+    "code": 0,
+    "has_additional_context": true,
+    "stdout": "{\"hookSpecificOutput\":{\"hookEventName\":\"UserPromptSubmit\",\"additionalContext\":\"<user-persona>\\n# User Narrative Profile\\n\\n> **Archetype**: A methodical infrastructure engineer who treats personal AI memory as a verifiable configuration audit trail.\\n\\n> **Basic Information**\\n> - Likely in a technical role involving system administration, DevOps, or infrastructure setup\\n> - Operates with a documentation-first, proof-oriented mindset\\n\\n> **Long-term Preferences**\\n> - Prefers named, verifiable configuration markers over ad-hoc checks\\n> - Uses AI memory as an explicit single source of truth for setup states\\n\\n## 📖 Chapter 1: Context & Current State\\n\\nThe user recently completed setting up DeepSeek Gateway extraction. Rather than relying on system logs or manual re-verification, they created a named proof marker — `llm-config-proof-1782584500` — and stored it as a remembered fact. This establishes a lightweight configuration audit trail where any component's operational status can be confirmed by simply querying the AI. The approach suggests a systematic preference for declarative, queryable state management over imperative checking.\\n\\n## 🎨 Chapter 2: The Texture of Life\\n\\nThe user's work style reveals a taste for infrastructure-as-code thinking applied even to personal tooling. They think in terms of verifiable states, named references, and traceable configuration landmarks. The timestamped proof pattern (`{purpose}-proof-{timestamp}`) hints at a personal naming convention — lightweight, self-documenting, and immediately readable. This isn't just setup; it's a small piece of personal engineering craft.\\n\\n## 🤖 Chapter 3: Interaction & Cognitive Protocol\\n\\n### 3.1 How to Speak\\n- Use precise, technical language with clear references. This user values accuracy over flair.\\n- Acknowledge and confirm configuration states explicitly when asked — mere processing is not enough; verifiable acknowledgment is expected.\\n\\n### 3.2 How to Think\\n- Think in terms of states and proofs: when given a configuration task, anticipate that the user will want a named artifact or marker to confirm completion.\\n- Treat remembered facts as infrastructure primitives — each one is a checkable node in a personal audit system, not just a note.\\n\\n## 🧩 Chapter 4: Deep Insights & Evolution\\n\\n* **Productive Contradictions**: The user automates verification (proof markers, queryable memory) but does so through a manual naming ritual — the timestamped proof label is hand-crafted, not auto-generated. This suggests a desire for control and readability even within automation.\\n\\n* **Evolution Trajectory**: *(First entry — baseline established.)*\\n\\n* **Emergent Traits**:\\n  - `Proof-oriented` - Leaves named verification markers for every configuration, prefers queryable proof over trust\\n  - `Systematic` - Applies infrastructure-as-code discipline to personal AI interactions\\n  - `Documentation-aware` - Names things not just to work, but to be readable later\\n  - `Lightweight-engineer` - Builds small, elegant systems (audit trails) rather than heavy process\\n</user-persona>\\n\\n<scene-navigation>\\n---\\n## 🗺️ Scene Navigation (Scene Index)\\n*以下是当前场景记忆的索引，可根据需要 read_file 读取详细内容。*\\n\\n### Path: /Users/nianjiu/.tdai-memory-gateway/scene_blocks/Adapter-Benchmark-PR-Standards.md\\n**热度**: 1 | **更新**: 2026-06-27T18:21:13+00:00\\nSummary: Records the PR summary format standard for adapter benchmark: risk first, then proof, then implementation (bench-pref-amber-714).\\n\\n### Path: /Users/nianjiu/.tdai-memory-gateway/scene_blocks/DeepSeek-Gateway-Config.md\\n**热度**: 1 | **更新**: 2026-06-27T18:20:05+00:00\\nSummary: Records the configuration marker llm-config-proof-1782584500, which confirms that DeepSeek Gateway extraction is properly configured and operational.\\n\\n📌 使用说明：\\n- Path 是 scene block 的绝对路径，可直接使用 read_file 读取完整内容\\n- 热度：该场景被记忆命中的累计次数，越高越重要\\n- Summary：场景的核心要点摘要\\n</scene-navigation>\\n\\n<memory-tools-guide>\\n## 记忆工具调用指南\\n\\n当上方注入的记忆片段不足以回答用户问题时，可主动调用以下工具获取更多信息：\\n\\n- **tdai_memory_search**：搜索结构化记忆（L1），适用于回忆用户偏好、历史事件节点、规则等关键信息。\\n- **tdai_conversation_search**：搜索原始对话（L0），适用于查找具体消息原文、时间线、上下文细节；也可用于补充或校验 memory_search 的结果。\\n- **read_file**（Scene Navigation 中的路径）：当已定位到相关情境，且需要该场景的完整画像、事件经过或阶段结论时使用。\\n\\n### ⚠️ 调用次数限制\\n每轮对话中，tdai_memory_search 和 tdai_conversation_search **合计最多调用 3 次**。\\n- 首次搜索无结果时，可换关键词或换工具重试，但总调用次数不要超过 3 次。\\n- 若 3 次搜索后仍无结果，说明该信息不在记忆中，请直接根据已有信息回复用户，不要继续搜索。\\n</memory-tools-guide>\\n\\nRelevant prior conversation memory from memory-tencentdb:\\n\\nFound 3 matching message(s):\\n\\n---\\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:09:41.946Z] (score: 0.905)\\n\\nFor adapter benchmark, remember this exact fact: bench-pref-amber-714 means \\\"PR summaries should start with risk, then proof, then implementation.\\\"\\n\\n---\\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:11:25.888Z] (score: 0.905)\\n\\nFor adapter benchmark, remember this exact fact: bench-pref-amber-714 means \\\"PR summaries should start with risk, then proof, then implementation.\\\"\\n\\n---\\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:23:01.086Z] (score: 0.905)\\n\\nFor adapter benchmark, remember this exact fact: bench-pref-amber-714 means \\\"PR summaries should start with risk, then proof, then implementation.\\\"\\n\"}}",
+    "stderr": "",
+    "latency_ms": 43
+  },
+  "hook_capture": {
+    "code": 0,
+    "stdout": "",
+    "stderr": "",
+    "latency_ms": 43,
+    "capture_search": {
+      "found": true,
+      "latency_ms": 2,
+      "search": {
+        "results": "Found 5 matching message(s):\n\n---\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:23:01.290Z] (score: 0.867)\n\nRemember hook-proof-smoke-1782584581253\n\n---\n**[assistant]** Session: adapter-benchmark-smoke [2026-06-27T18:23:01.290Z] (score: 0.850)\n\nSynthetic hook capture succeeded for hook-proof-smoke-1782584581253.\n\n---\n**[assistant]** Session: adapter-benchmark-smoke [2026-06-27T18:09:42.092Z] (score: 0.000)\n\nSynthetic hook capture succeeded for hook-proof-smoke-1782583782056.\n\n---\n**[assistant]** Session: adapter-benchmark-smoke [2026-06-27T18:11:26.222Z] (score: 0.000)\n\nSynthetic hook capture succeeded for hook-proof-smoke-1782583886183.\n\n---\n**[user]** Session: adapter-benchmark-smoke [2026-06-27T18:09:42.092Z] (score: 0.000)\n\nRemember hook-proof-smoke-1782583782056\n",
+        "total": 5
+      }
+    }
+  }
+}

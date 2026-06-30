@@ -1,0 +1,1 @@
+Adapter benchmark PR standards: risk → proof → implementation, Chinese for reasoning, English for PRs, and Codex adapter evidence should show raw MCP tool calls.

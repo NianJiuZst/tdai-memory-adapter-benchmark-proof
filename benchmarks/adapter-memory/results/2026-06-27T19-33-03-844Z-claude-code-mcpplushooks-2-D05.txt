@@ -1,0 +1,3 @@
+I've exhausted the search limit (3 calls per round) across both conversation and memory search. The results only contain recursive loops of my own past queries — the defining sentence for `bench-decision-zenith-129` is not present in any returnable search result. It appears the definition was in an assistant response that the conversation search doesn't index, or in a session not covered by the current index.
+
+I cannot answer what `bench-decision-zenith-129` means — the defining sentence is not retrievable from the available search results.

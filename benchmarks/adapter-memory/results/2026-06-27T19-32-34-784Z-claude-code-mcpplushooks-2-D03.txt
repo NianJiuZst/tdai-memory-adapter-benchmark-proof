@@ -1,0 +1,1 @@
+bench-decision-east-652 means "Hermes keeps its provider shape and talks to the same Gateway contract."

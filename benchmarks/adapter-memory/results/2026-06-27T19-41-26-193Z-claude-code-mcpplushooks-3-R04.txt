@@ -1,0 +1,1 @@
+bench-detail-hook-508 means "UserPromptSubmit performs recall and Stop performs capture through the hook bridge."

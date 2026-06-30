@@ -1,0 +1,1 @@
+Adapter Benchmark PR Standards: risk→proof→implementation PR format, bilingual rules, Codex adapter evidence requirements, reproducibility/security rules, and a preference for narrow adapters over broad SDKs.

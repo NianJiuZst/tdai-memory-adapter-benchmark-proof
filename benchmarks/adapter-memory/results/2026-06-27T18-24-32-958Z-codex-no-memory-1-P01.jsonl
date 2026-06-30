@@ -1,0 +1,6 @@
+{"type":"thread.started","thread_id":"019f0a53-82f7-7b90-b453-997aee6b7d1d"}
+{"type":"item.completed","item":{"id":"item_0","type":"error","message":"`--dangerously-bypass-hook-trust` is enabled. Enabled hooks may run without review for this invocation."}}
+{"type":"item.completed","item":{"id":"item_1","type":"error","message":"`--dangerously-bypass-hook-trust` is enabled. Enabled hooks may run without review for this invocation."}}
+{"type":"turn.started"}
+{"type":"item.completed","item":{"id":"item_2","type":"agent_message","text":"PR summaries should start with risk, then proof, then implementation."}}
+{"type":"turn.completed","usage":{"input_tokens":13139,"cached_input_tokens":9088,"output_tokens":17,"reasoning_output_tokens":0}}

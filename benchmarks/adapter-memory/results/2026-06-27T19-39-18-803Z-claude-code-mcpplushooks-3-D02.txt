@@ -1,0 +1,5 @@
+I couldn't find a sentence containing `bench-decision-west-318 means "..."` in the conversation search results. The search only returned your own query messages asking about this codename, but the actual definition (the assistant response that defined it) does not appear in the indexed conversation history or in any memory file.
+
+The closest related codename I found is `bench-pref-amber-714`, which means "PR summaries should start with risk, then proof, then implementation." But that's a different codename.
+
+The definition for `bench-decision-west-318` does not appear to be stored in the current memory system. If you remember what it means, I can store it now so it's retrievable next time.

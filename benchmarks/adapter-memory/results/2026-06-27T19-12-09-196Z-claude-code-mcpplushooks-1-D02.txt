@@ -1,0 +1,5 @@
+The search results across both conversation history and structured memory do not contain a sentence defining `bench-decision-west-318`. 
+
+The conversation search returned only three previous instances of this exact question being asked (in different sessions), but none contain the answer — they are all just the question itself. The structured memory search found only the related codename `bench-pref-amber-714` (which means "PR summaries should start with risk, then proof, then implementation"), but not `bench-decision-west-318`.
+
+**The meaning of `bench-decision-west-318` is not recorded in memory.** It may not have been saved yet.

@@ -1,0 +1,1 @@
+bench-conv-onyx-386 means "Codex adapter evidence must show the MCP tool call, not only final assistant prose."
