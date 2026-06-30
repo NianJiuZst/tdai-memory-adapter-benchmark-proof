@@ -7,7 +7,7 @@ Upstream source repository:
 - Repository: `TencentCloud/TencentDB-Agent-Memory`
 - Issue: `https://github.com/TencentCloud/TencentDB-Agent-Memory/issues/235`
 - Source commit originally used for this evidence bundle: `590a30b8524ef2a7f08942f460f196b1527acfbb`
-- Clean upstream PR commit after moving proof artifacts out: `6fbc216e3d68af9f16f702fbfeb1567d418cbf22`
+- Clean upstream PR commit after moving proof artifacts out: `353655d5ceffb09fb7a1b681afbb447d6daef212`
 - Base commit: `4339e63650920871eb0e8888083a1779d114e3ae`
 - Generated at: `2026-06-28T05:57:48.438Z`
 
