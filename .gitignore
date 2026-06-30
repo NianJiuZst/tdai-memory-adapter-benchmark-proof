@@ -1,0 +1,13 @@
+.DS_Store
+.env
+.env.*
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Raw benchmark runs can contain local paths and diagnostics.
+benchmarks/adapter-memory/results/*.json
+benchmarks/adapter-memory/results/*.jsonl
+benchmarks/adapter-memory/results/*.txt
