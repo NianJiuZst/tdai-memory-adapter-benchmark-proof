@@ -1,0 +1,1 @@
+bench-conv-ivory-527 means "Claude Code adapter evidence must include hook recall or capture proof from the local Gateway."

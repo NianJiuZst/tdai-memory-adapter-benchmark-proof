@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn } from "node:child_process";
-import { mkdir, mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readFile, readdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
@@ -20,9 +20,12 @@ const artifactResultsDir = join(proofRoot, "docs", "benchmark-artifacts", "resul
 const reportPath = join(proofRoot, "docs", "adapter-benchmark-results.md");
 const gatewayUrl = (process.env.MEMORY_TENCENTDB_GATEWAY_URL || "http://127.0.0.1:8420").replace(/\/+$/, "");
 const claudeBenchModel = process.env.CLAUDE_BENCH_MODEL || "deepseek-v4-flash";
+const opencodeBenchModel = process.env.OPENCODE_BENCH_MODEL || "deepseek/deepseek-v4-flash";
+const opencodeNpxPackage = process.env.OPENCODE_NPX_PACKAGE || "opencode-ai@1.17.12";
 const nodeBin = process.execPath;
 const mcpBin = join(repoRoot, "bin", "memory-tencentdb-mcp.mjs");
 const hookBin = join(repoRoot, "bin", "memory-tencentdb-hook.mjs");
+const opencodePluginSource = join(repoRoot, "integrations", "opencode", "plugin.js");
 
 const passTargets = {
   gatewayHealth: 1,
@@ -522,6 +525,14 @@ function findClaudeCommand() {
   return candidates.find((candidate) => candidate === "claude" || existsSync(candidate)) || candidates[0];
 }
 
+function findOpenCodeCommand() {
+  if (process.env.OPENCODE_BIN) return { command: process.env.OPENCODE_BIN, args: [] };
+  return {
+    command: process.env.NPX_BIN || "npx",
+    args: ["-y", "-p", opencodeNpxPackage, "opencode"],
+  };
+}
+
 async function runCodexPrompt(prompt, mode, rawName) {
   const outputFile = join(resultsDir, `${rawName}.txt`);
   const eventsFile = join(resultsDir, `${rawName}.jsonl`);
@@ -587,6 +598,23 @@ function parseClaudeStream(stdout) {
   return finalResult || assistantTexts.join("\n");
 }
 
+function parseOpenCodeStream(stdout) {
+  const texts = [];
+  for (const line of String(stdout || "").split(/\r?\n/)) {
+    if (!line.trim()) continue;
+    let event;
+    try {
+      event = JSON.parse(line);
+    } catch {
+      continue;
+    }
+    if (event.type === "text" && typeof event.part?.text === "string") {
+      texts.push(event.part.text);
+    }
+  }
+  return texts.join("\n").trim();
+}
+
 async function runClaudePrompt(prompt, mode, rawName) {
   const outputFile = join(resultsDir, `${rawName}.txt`);
   const eventsFile = join(resultsDir, `${rawName}.jsonl`);
@@ -630,6 +658,77 @@ async function runClaudePrompt(prompt, mode, rawName) {
   return { ...result, answer, output_file: outputFile, events_file: eventsFile, cwd, command };
 }
 
+async function prepareOpenCodeCwd(mode, rawName) {
+  const cwd = await mkdtemp(join(tmpdir(), mode === "no-memory"
+    ? "memory-bench-opencode-baseline-"
+    : "memory-bench-opencode-mcp-hooks-"));
+  const auditFile = join(resultsDir, `${rawName}-opencode-audit.jsonl`);
+  const config = {
+    $schema: "https://opencode.ai/config.json",
+    model: opencodeBenchModel,
+  };
+
+  if (mode === "mcp+hooks") {
+    await mkdir(join(cwd, ".opencode", "plugins"), { recursive: true });
+    await copyFile(opencodePluginSource, join(cwd, ".opencode", "plugins", "memory-tencentdb.js"));
+    config.mcp = {
+      "memory-tencentdb": {
+        type: "local",
+        command: [nodeBin, mcpBin],
+        enabled: true,
+        environment: {
+          MEMORY_TENCENTDB_GATEWAY_URL: gatewayUrl,
+        },
+      },
+    };
+  }
+
+  await writeFile(join(cwd, "opencode.json"), `${JSON.stringify(config, null, 2)}\n`, "utf-8");
+  return { cwd, auditFile };
+}
+
+async function runOpenCodePrompt(prompt, mode, rawName) {
+  const outputFile = join(resultsDir, `${rawName}.txt`);
+  const eventsFile = join(resultsDir, `${rawName}.jsonl`);
+  const { cwd, auditFile } = await prepareOpenCodeCwd(mode, rawName);
+  const executable = findOpenCodeCommand();
+  const args = [
+    ...executable.args,
+    "run",
+    "--dir",
+    cwd,
+    "-m",
+    opencodeBenchModel,
+    "--format",
+    "json",
+    "--auto",
+  ];
+  if (mode === "no-memory") args.push("--pure");
+  args.push(prompt);
+
+  const result = await spawnCapture(executable.command, args, {
+    cwd,
+    env: {
+      MEMORY_TENCENTDB_GATEWAY_URL: gatewayUrl,
+      MEMORY_TENCENTDB_OPENCODE_AUDIT_LOG: auditFile,
+    },
+    timeoutMs: 240_000,
+  });
+  await writeFile(eventsFile, result.stdout || "", "utf-8");
+  const answer = parseOpenCodeStream(result.stdout) || result.stdout || result.stderr || "";
+  await writeFile(outputFile, answer, "utf-8");
+  return {
+    ...result,
+    answer,
+    output_file: outputFile,
+    events_file: eventsFile,
+    hook_audit_file: mode === "mcp+hooks" ? auditFile : undefined,
+    cwd,
+    command: [executable.command, ...executable.args].join(" "),
+    model: opencodeBenchModel,
+  };
+}
+
 function agentPrompt(fact, mode, sessionKey) {
   if (mode === "mcp+hooks") {
     const args = {
@@ -640,6 +739,7 @@ function agentPrompt(fact, mode, sessionKey) {
     return [
       `Call memory_tencentdb_conversation_search with these exact JSON arguments: ${JSON.stringify(args)}.`,
       "Do not call memory_tencentdb_memory_search for this benchmark item.",
+      "Use only the session_key shown above. Do not switch to any other session_key even if another key appears in memory context.",
       `In the raw conversation result, find the sentence containing '${fact.marker} means "..."'.`,
       `Answer this question using only the quoted meaning from that exact sentence: ${fact.query_prompt}`,
       "Do not edit files or run shell commands. Do not summarize a scene or profile. Answer only with the remembered meaning.",
@@ -659,7 +759,12 @@ async function agentBenchmark(opts) {
   const repeats = Number(opts.repeats || 3);
   const facts = await loadFacts(limit);
   const sessionKey = `adapter-benchmark-agent-${platform}-${Date.now()}`;
-  if (mode === "mcp+hooks") await seedFacts(facts, sessionKey);
+  let seed = [];
+  let seedSearch;
+  if (mode === "mcp+hooks") {
+    seed = await seedFacts(facts, sessionKey);
+    seedSearch = await waitSearch(facts[0].marker, facts[0].expected_answer, sessionKey, 30_000);
+  }
   const records = [];
   const raw = [];
 
@@ -669,7 +774,9 @@ async function agentBenchmark(opts) {
       const prompt = agentPrompt(fact, mode, sessionKey);
       const execution = platform === "claude-code"
         ? await runClaudePrompt(prompt, mode, rawName)
-        : await runCodexPrompt(prompt, mode, rawName);
+        : platform === "opencode"
+          ? await runOpenCodePrompt(prompt, mode, rawName)
+          : await runCodexPrompt(prompt, mode, rawName);
       const score = scoreText(execution.answer, fact.expected_answer);
       const toolEvidence = /memory_tencentdb_(conversation|memory)_search/.test(execution.stdout || execution.answer || "");
       records.push({
@@ -686,6 +793,7 @@ async function agentBenchmark(opts) {
         output_file: relativePath(execution.output_file),
         events_file: relativePath(execution.events_file),
         hook_audit_file: execution.hook_audit_file ? relativePath(execution.hook_audit_file) : undefined,
+        model: execution.model,
         tool_evidence: toolEvidence,
         answer_excerpt: String(execution.answer || "").slice(0, 500),
         stderr_excerpt: String(execution.stderr || "").slice(0, 500).replaceAll(repoRoot, "<repo>"),
@@ -710,8 +818,11 @@ async function agentBenchmark(opts) {
     created_at: nowIso(),
     platform,
     mode,
+    session_key: sessionKey,
     facts: facts.length,
     repeats,
+    seed,
+    seed_search: seedSearch,
     summary: {
       ...summary,
       tool_evidence_rate: records.length
@@ -859,9 +970,11 @@ async function modelsFromRecords(result) {
         continue;
       }
       if (event.message?.model) models.add(event.message.model);
+      if (record.model) models.add(record.model);
       if (event.subtype === "hook_started" || event.subtype === "hook_response") hookEvents += 1;
       if (event.message?.content?.some?.((part) => part?.type === "tool_use")) toolEvents += 1;
       if (event.type === "item.completed" && JSON.stringify(event).includes("memory_tencentdb_")) toolEvents += 1;
+      if (event.type === "tool_use" && JSON.stringify(event).includes("memory_tencentdb_")) toolEvents += 1;
     }
     if (record.hook_audit_file) {
       try {
@@ -908,6 +1021,7 @@ function sanitizeRecord(record) {
   if ("has_additional_context" in record) sanitized.has_additional_context = record.has_additional_context;
   if ("false_positive" in record) sanitized.false_positive = record.false_positive;
   if ("answer_excerpt" in record) sanitized.answer_excerpt = record.answer_excerpt;
+  if ("model" in record) sanitized.model = record.model;
   return sanitized;
 }
 
@@ -961,15 +1075,15 @@ async function report() {
     .filter((result) => result.health)
     .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
   const lines = [
-    "# Codex 和 Claude Code 适配 Benchmark 结果 / Codex and Claude Code Adapter Benchmark Results",
+    "# Codex、Claude Code 和 OpenCode 适配 Benchmark 结果 / Codex, Claude Code, and OpenCode Adapter Benchmark Results",
     "",
     `生成时间 / Generated: ${generatedAt}`,
     "",
     "## 范围 / Scope",
     "",
-    "本报告只评估两种模式：`no-memory` 和 `mcp+hooks`。适配路线由本地 Gateway、MCP 搜索工具和生命周期 hooks 组成。",
+    "本报告只评估两种模式：`no-memory` 和 `mcp+hooks`。适配路线由本地 Gateway、MCP 搜索工具、生命周期 hooks/plugin 组成。",
     "",
-    "This report evaluates only two modes: `no-memory` and `mcp+hooks`. The adapter route combines the local Gateway, MCP search tools, and lifecycle hooks.",
+    "This report evaluates only two modes: `no-memory` and `mcp+hooks`. The adapter route combines the local Gateway, MCP search tools, and lifecycle hooks/plugins.",
     "",
     "## 环境 / Environment",
     "",
@@ -977,6 +1091,8 @@ async function report() {
     `- Gateway health / 健康状态: \`${latestSmoke?.health?.status || "not recorded"}\``,
     `- MCP tools observed / 已观测 MCP 工具: \`${latestSmoke?.mcp?.tools?.join(", ") || "not recorded"}\``,
     "- Gateway LLM / 本次 Gateway LLM: `https://api.deepseek.com` / `deepseek-v4-flash` (API key 仅保存在本地配置中，证据产物已脱敏 / API key is stored only in local config and redacted from artifacts)",
+    `- OpenCode runner / OpenCode 运行入口: \`${process.env.OPENCODE_BIN || `npx -y -p ${opencodeNpxPackage} opencode`}\``,
+    `- OpenCode benchmark model / OpenCode benchmark 模型: \`${opencodeBenchModel}\``,
     `- Raw local result directory / 本地原始结果目录: \`benchmarks/adapter-memory/results\``,
     `- Sanitized result directory / 脱敏结果目录: \`docs/benchmark-artifacts/results\``,
     `- Screenshot directory / 截图目录: \`docs/benchmark-artifacts/screenshots\``,
@@ -1008,8 +1124,10 @@ async function report() {
     "- Codex screenshot / Codex 截图: `docs/benchmark-artifacts/screenshots/codex-proof.png`",
     "- Claude Code proof page / Claude Code 证明页: `docs/benchmark-artifacts/proofs/claude-code-proof.html`",
     "- Claude Code screenshot / Claude Code 截图: `docs/benchmark-artifacts/screenshots/claude-code-proof.png`",
+    "- OpenCode proof page / OpenCode 证明页: `docs/benchmark-artifacts/proofs/opencode-proof.html`",
+    "- OpenCode screenshot / OpenCode 截图: `docs/benchmark-artifacts/screenshots/opencode-proof.png`",
     "- Sanitized JSON result files / 脱敏 JSON 结果: `docs/benchmark-artifacts/results/`",
-    "- Raw local JSON/JSONL outputs / 本地原始输出: `benchmarks/adapter-memory/results/`，仅用于本地审计且已被 git 忽略 / for local audit only and ignored by git.",
+    "- Raw local JSON/JSONL outputs / 本地原始输出: `benchmarks/adapter-memory/results/`，已纳入该 proof 仓库用于完整证据审计 / committed in this proof repository for complete evidence audit.",
     "- Gateway/MCP/hook log excerpts with secrets removed / Gateway、MCP、hook 日志摘录需要移除密钥。",
     "",
     "## 截图证据 / Screenshot Evidence",
@@ -1018,10 +1136,13 @@ async function report() {
     "",
     "![Claude Code proof](benchmark-artifacts/screenshots/claude-code-proof.png)",
     "",
+    "![OpenCode proof](benchmark-artifacts/screenshots/opencode-proof.png)",
+    "",
     "## 说明 / Notes",
     "",
     "- `local-adapter` 行用于排除模型波动，验证共享 Gateway、MCP server 和 hook bridge 的确定性行为。 / The `local-adapter` rows verify deterministic Gateway, MCP server, and hook bridge behavior without model variance.",
-    "- Codex 和 Claude Code 行证明真实平台入口可以走同一条适配路线。 / The Codex and Claude Code rows prove the same route through real platform entrypoints.",
+    "- Codex、Claude Code 和 OpenCode 行证明真实平台入口可以走同一条适配路线。 / The Codex, Claude Code, and OpenCode rows prove the same route through real platform entrypoints.",
+    "- OpenCode 行使用项目级 `opencode.json` MCP 配置和 `.opencode/plugins/memory-tencentdb.js` plugin，并固定 `deepseek/deepseek-v4-flash`。 / The OpenCode rows use project-level `opencode.json` MCP config plus `.opencode/plugins/memory-tencentdb.js`, pinned to `deepseek/deepseek-v4-flash`.",
     "- 截图来自 raw platform JSONL 生成的 proof page；即使桌面自动化无法直接控制 Codex 或终端窗口，证据仍然可审阅。 / Screenshots are proof-page captures generated from raw platform JSONL streams, keeping evidence reviewable even when desktop automation cannot control Codex or terminal windows.",
     "- 如果某个平台行缺失，应先查看对应 CLI discovery/error 输出，再判断是否是 adapter 故障。 / If a platform row is missing, inspect CLI discovery/error output before treating it as an adapter failure.",
     "",
@@ -1074,6 +1195,34 @@ function compactEvent(platform, event) {
     }
     if (item?.type === "agent_message") {
       return { kind: "最终回答 / Final answer", text: item.text };
+    }
+    return undefined;
+  }
+
+  if (platform === "opencode") {
+    if (event.type === "tool_use" && event.part?.tool?.includes("memory-tencentdb")) {
+      return {
+        kind: "MCP 工具调用与结果 / MCP tool call and result",
+        text: JSON.stringify({
+          tool: event.part.tool,
+          input: event.part.state?.input,
+          status: event.part.state?.status,
+          output: event.part.state?.output,
+        }, null, 2),
+      };
+    }
+    if (event.type === "text" && event.part?.text) {
+      return { kind: "最终回答 / Final answer", text: event.part.text };
+    }
+    if (event.type === "step_finish" && event.part?.tokens) {
+      return {
+        kind: "模型与 token 信号 / Model and token signal",
+        text: JSON.stringify({
+          reason: event.part.reason,
+          tokens: event.part.tokens,
+          cost: event.part.cost,
+        }, null, 2),
+      };
     }
     return undefined;
   }
@@ -1163,7 +1312,7 @@ async function proofRowsForRecord(record) {
       seen.add(key);
       return true;
     })
-    .slice(0, record.platform === "claude-code" ? 8 : 5);
+    .slice(0, record.platform === "claude-code" || record.platform === "opencode" ? 8 : 5);
 }
 
 function chooseProofRecord(result) {
@@ -1175,11 +1324,18 @@ function chooseProofRecord(result) {
 }
 
 function screenshotPathFor(platform) {
-  return join(screenshotsDir, `${platform === "claude-code" ? "claude-code" : "codex"}-proof.png`);
+  return join(screenshotsDir, `${platform}-proof.png`);
 }
 
 function proofPathFor(platform) {
-  return join(proofsDir, `${platform === "claude-code" ? "claude-code" : "codex"}-proof.html`);
+  return join(proofsDir, `${platform}-proof.html`);
+}
+
+function platformLabel(platform) {
+  if (platform === "claude-code") return "Claude Code";
+  if (platform === "opencode") return "OpenCode";
+  if (platform === "codex") return "Codex";
+  return platform;
 }
 
 async function writeProofPage(result, selected, latestSmoke) {
@@ -1188,7 +1344,8 @@ async function writeProofPage(result, selected, latestSmoke) {
   const details = await modelsFromRecords(result);
   const baseline = selected.find((item) => item.platform === result.platform && item.mode === "no-memory");
   const proofRows = await proofRowsForRecord(record);
-  const title = `${result.platform === "claude-code" ? "Claude Code" : "Codex"} TencentDB Agent Memory 证明 / Proof`;
+  const label = platformLabel(result.platform);
+  const title = `${label} TencentDB Agent Memory 证明 / Proof`;
   const screenshotPath = screenshotPathFor(result.platform);
   const html = `<!doctype html>
 <html lang="zh-Hans">
@@ -1237,7 +1394,7 @@ async function writeProofPage(result, selected, latestSmoke) {
         <tr><th>记忆工具调用 / Memory tool call</th><td><code>memory_tencentdb_conversation_search</code> 查询 / queried <code>${escapeHtml(record.marker)}</code></td></tr>
         <tr><th>返回记忆 / Returned memory</th><td>For adapter benchmark, remember this exact fact: <code>${escapeHtml(record.marker)}</code> means &quot;${escapeHtml(record.expected)}&quot;</td></tr>
         <tr><th>Agent 回答 / Agent answer</th><td>${escapeHtml(record.answer_excerpt)}</td></tr>
-        <tr><th>Hook/模型信号 / Hook/model signal</th><td>${result.platform === "claude-code" ? `Claude Code hooks observed / 已观测 hooks: ${details.hookEvents}; model / 模型: ${details.models.length ? details.models.join(", ") : "n/a"}` : `Codex hooks observed / 已观测 hooks: ${details.hookEvents}; MCP tool events / MCP 工具事件: ${details.toolEvents}`}</td></tr>
+        <tr><th>Hook/模型信号 / Hook/model signal</th><td>${escapeHtml(label)} audit/hook events observed / 已观测 audit/hooks: ${details.hookEvents}; MCP tool events / MCP 工具事件: ${details.toolEvents}; model / 模型: ${details.models.length ? details.models.join(", ") : "n/a"}</td></tr>
       </table>
     </section>
 
@@ -1285,7 +1442,7 @@ async function proofs() {
     .filter((result) => result.health)
     .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0];
   const files = [];
-  for (const platform of ["codex", "claude-code"]) {
+  for (const platform of ["codex", "claude-code", "opencode"]) {
     const result = selected.find((item) => item.platform === platform && item.mode === "mcp+hooks");
     if (!result) continue;
     const file = await writeProofPage(result, selected, latestSmoke);
@@ -1301,6 +1458,8 @@ async function full(opts) {
   await agentBenchmark({ ...opts, platform: "codex", mode: "mcp+hooks" });
   await agentBenchmark({ ...opts, platform: "claude-code", mode: "no-memory" });
   await agentBenchmark({ ...opts, platform: "claude-code", mode: "mcp+hooks" });
+  await agentBenchmark({ ...opts, platform: "opencode", mode: "no-memory" });
+  await agentBenchmark({ ...opts, platform: "opencode", mode: "mcp+hooks" });
   await proofs();
   await report();
 }
@@ -1318,6 +1477,7 @@ async function main() {
   node benchmarks/adapter-memory/run.mjs smoke
   node benchmarks/adapter-memory/run.mjs local --repeats 3 --limit 20
   node benchmarks/adapter-memory/run.mjs agents --platform codex --mode mcp+hooks --repeats 3 --limit 20
+  node benchmarks/adapter-memory/run.mjs agents --platform opencode --mode mcp+hooks --repeats 3 --limit 20
   node benchmarks/adapter-memory/run.mjs proofs
   node benchmarks/adapter-memory/run.mjs report
   node benchmarks/adapter-memory/run.mjs full --repeats 3 --limit 20`);

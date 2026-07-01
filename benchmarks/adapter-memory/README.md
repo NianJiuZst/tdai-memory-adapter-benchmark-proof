@@ -1,12 +1,12 @@
-# Codex 和 Claude Code MCP+Hooks Benchmark / Codex and Claude Code MCP+Hooks Benchmark
+# Codex、Claude Code 和 OpenCode MCP+Hooks Benchmark / Codex, Claude Code, and OpenCode MCP+Hooks Benchmark
 
-本 benchmark 用两层证据证明 Codex 与 Claude Code 适配可用且有效。  
-This benchmark proves the Codex and Claude Code adapters with two evidence layers.
+本 benchmark 用两层证据证明 Codex、Claude Code 与 OpenCode 适配可用且有效。
+This benchmark proves the Codex, Claude Code, and OpenCode adapters with two evidence layers.
 
 - 确定性本地检查：直接验证 Gateway、MCP server 和 hook bridge。  
   Deterministic local checks validate the Gateway, MCP server, and hook bridge.
-- 真实平台检查：通过 Codex 与 Claude Code 命令入口执行。  
-  Real platform checks run through Codex and Claude Code command entrypoints.
+- 真实平台检查：通过 Codex、Claude Code 与 OpenCode 命令入口执行。
+  Real platform checks run through Codex, Claude Code, and OpenCode command entrypoints.
 
 对比矩阵只保留两组。  
 The comparison intentionally keeps only two modes.
@@ -24,6 +24,8 @@ When rerunning from this standalone proof repo, point the harness at a clean sou
 ```sh
 export TENCENTDB_AGENT_MEMORY_REPO=/path/to/TencentDB-Agent-Memory
 export MEMORY_TENCENTDB_GATEWAY_URL=http://127.0.0.1:8420
+export OPENCODE_BENCH_MODEL=deepseek/deepseek-v4-flash
+export OPENCODE_NPX_PACKAGE=opencode-ai@1.17.12
 ```
 
 如果 `TENCENTDB_AGENT_MEMORY_REPO` 未设置，脚本会假设自己仍在源码仓库中运行。  
@@ -45,6 +47,7 @@ Useful targeted commands.
 ```sh
 node benchmarks/adapter-memory/run.mjs agents --platform codex --mode mcp+hooks --repeats 3 --limit 20
 node benchmarks/adapter-memory/run.mjs agents --platform claude-code --mode no-memory --repeats 3 --limit 20
+node benchmarks/adapter-memory/run.mjs agents --platform opencode --mode mcp+hooks --repeats 3 --limit 20
 node benchmarks/adapter-memory/run.mjs local --repeats 3 --limit 20
 ```
 
@@ -60,6 +63,9 @@ node benchmarks/adapter-memory/run.mjs local --repeats 3 --limit 20
   `docs/benchmark-artifacts/screenshots/` stores screenshot evidence captured from proof pages.
 - `docs/adapter-benchmark-results.md` 是最终 benchmark 报告。  
   `docs/adapter-benchmark-results.md` is the final generated benchmark report.
+
+OpenCode lane 会在临时项目中生成 `opencode.json`，复制源码仓的 `.opencode/plugins/memory-tencentdb.js`，并通过 `npx -y -p opencode-ai@1.17.12 opencode run -m deepseek/deepseek-v4-flash` 执行。
+The OpenCode lane writes a temporary `opencode.json`, copies the source plugin to `.opencode/plugins/memory-tencentdb.js`, and runs `npx -y -p opencode-ai@1.17.12 opencode run -m deepseek/deepseek-v4-flash`.
 
 生成报告和证明页时不能包含密钥。  
 Generated reports and proof pages must not include secrets.

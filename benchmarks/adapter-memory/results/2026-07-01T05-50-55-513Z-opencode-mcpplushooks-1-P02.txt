@@ -1,0 +1,1 @@
+"Use Chinese explanations for local reasoning and English descriptions for PR bodies."

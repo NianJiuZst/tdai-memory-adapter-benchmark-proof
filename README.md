@@ -8,8 +8,9 @@ Upstream source repository:
 - Issue: `https://github.com/TencentCloud/TencentDB-Agent-Memory/issues/235`
 - Source commit originally used for this evidence bundle: `590a30b8524ef2a7f08942f460f196b1527acfbb`
 - Clean upstream PR commit after moving proof artifacts out: `d40c457d5dac69c1b077d9f0c05c78ffa2909bd9`
+- OpenCode adapter source commit: `d9d1b56`
 - Base commit: `4339e63650920871eb0e8888083a1779d114e3ae`
-- Generated at: `2026-06-28T05:57:48.438Z`
+- Generated at: `2026-07-01T05:59:28.577Z`
 
 ## Why This Is Separate
 
@@ -45,6 +46,8 @@ Before publishing the raw bundle, it was scanned for common secret patterns such
 | claude-code | `no-memory` | baseline | 60 | 0.0% |
 | codex | `mcp+hooks` | explicit retrieval | 20 | 100.0% |
 | codex | `no-memory` | baseline | 60 | 0.0% |
+| opencode | `mcp+hooks` | explicit retrieval | 60 | 95.0% |
+| opencode | `no-memory` | baseline | 60 | 0.0% |
 
 See `docs/adapter-benchmark-results.md` for the full generated report.
 
@@ -55,11 +58,14 @@ Check out the upstream source branch separately, install dependencies there, and
 ```sh
 export TENCENTDB_AGENT_MEMORY_REPO=/path/to/TencentDB-Agent-Memory
 export MEMORY_TENCENTDB_GATEWAY_URL=http://127.0.0.1:8420
+export OPENCODE_BENCH_MODEL=deepseek/deepseek-v4-flash
+export OPENCODE_NPX_PACKAGE=opencode-ai@1.17.12
 
 node benchmarks/adapter-memory/run.mjs smoke
 node benchmarks/adapter-memory/run.mjs local --repeats 3 --limit 20
 node benchmarks/adapter-memory/run.mjs agents --platform codex --mode mcp+hooks --repeats 3 --limit 20
 node benchmarks/adapter-memory/run.mjs agents --platform claude-code --mode mcp+hooks --repeats 3 --limit 20
+node benchmarks/adapter-memory/run.mjs agents --platform opencode --mode mcp+hooks --repeats 3 --limit 20
 node benchmarks/adapter-memory/run.mjs proofs
 node benchmarks/adapter-memory/run.mjs report
 ```

@@ -1,0 +1,1 @@
+bench-pref-lilac-482 means "Evidence should include exact commands, visible output, and one concise maintainer note."
